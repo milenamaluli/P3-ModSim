@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue May 16 07:35:34 2017
+Created on Thu May 18 16:17:10 2017
 
 @author: milen
 """
@@ -14,17 +14,13 @@ tempo=np.arange(0,4,0.01)
 #cd 0.70 a 50000
 #cd=24/re
 g=10 #m/s2
-m=6 #kg
-A=math.pi*(0.15**2) #m2
+m=47.1 #kg
+A=0.51 #m2
 Vo=20 #m/s
 B=(math.pi/4) #rad
-Cx=0.7
+Ch=1.3
 p=1.3 #kg/m**3
 
-
-def Fr(v):
-    r=(1/2)*p*Cx*A*(v**2)
-    return r
 
 def senodoa(vx,vy):
     s=vx/((vx**2+vy**2)**(1/2))
@@ -43,8 +39,8 @@ def eq(Y,tempo):
     vy=Y[3]
     dxdt=vx
     dydt=vy
-    dvxdt=-Fr(vx)*senodoa(vx,vy)/m
-    dvydt=-g-Fr(vy)*cossdoa(vx,vy)/m
+    dvxdt=-(1/2)*p*Ch*(A*senodoa(vx,vy))*(vx**2)*senodoa(vx,vy)/m
+    dvydt=-g-(1/2)*p*Ch*(A*senodoa(vx,vy))*(vy**2)*cossdoa(vx,vy)/m
     return [dxdt,dydt,dvxdt,dvydt]
 
 
@@ -63,17 +59,20 @@ plt.ylabel('Variação da altura(m)')
 plt.xlabel('Variação da distância(m)')
 plt.axis([0, 40, 0, 12])
 plt.grid(True)
-plt.title("Descrição da trajetótia de uma esfera")
+plt.title("Descrição da trajetótia de uma pessoa ereta")
 plt.show()
 
 
 import numpy as np
 from matplotlib import pyplot as plt
+import matplotlib.patches as patches
 from matplotlib import animation
 
 x1 = equacoes[:,0]
 y1 = equacoes[:,1]
-
+#parâmetros
+rb=0.2
+ra=1
 
 fig = plt.figure()
 ax = fig.add_subplot(111, autoscale_on=False, xlim=(0, 40), ylim=(0, 12))
@@ -83,17 +82,23 @@ line, = ax.plot([], [], 'o-', lw=2)
 time_template = 'time = %.1fs'
 time_text = ax.text(0.5, 0.9, '', transform=ax.transAxes)
 
+barra = patches.Rectangle((0, 0), 0, 0, fc='b')
+barra.set_width(rb)
+barra.set_height(1.0)
 
 def init():
+    ax.add_patch(barra)
     line.set_data([], [])
     time_text.set_text('')
     return line,time_text
 
 
 def animate(i):
+    barra.set_xy([x1[i]-rb/2, y1[i]-1])
     line.set_data(x1[i], y1[i])
     time_text.set_text(time_template % (i*0.01))
-    return line,time_text
+    return line,time_text,barra
 
 ani = animation.FuncAnimation(fig, animate,300, interval=25, blit=True, init_func=init)
+# ani.save('double_pendulum.mp4', fps=15)
 plt.show()
