@@ -51,12 +51,44 @@ def eq(Y,tempo):
 
 C0=[0,0,Vo*math.cos(B),Vo*math.sin(B)]
 equacoes=odeint(eq,C0,tempo)
-#plt.plot(equacoes[:,2],equacoes[:,3])
-#plt.ylabel('dvydt')
-#plt.xlabel('dvxdt')
-#plt.grid(True)
-#plt.show()
 
+
+VX=[]
+VY=[]
+
+for i in equacoes[:,2]:
+    VX.append(i)
+    
+for i in equacoes[:,3]:
+    VY.append(i)
+
+V=[]
+for i in range(len(VX)):
+    a=((VX[i]**2)+(VY[i]**2))**(1/2)
+    V.append(a)
+    
+    
+plt.plot(tempo,equacoes[:,2])
+plt.ylabel('Velocidade em x(m/s)')
+plt.xlabel('tempo(s)')
+plt.title('Velocidade em x')
+plt.grid(True)
+plt.show()
+
+plt.plot(tempo,equacoes[:,3])
+plt.ylabel('Velocidade em y(m/s)')
+plt.xlabel('tempo(s)')
+plt.title('Velocidade em y')
+plt.grid(True)
+plt.show()
+
+
+plt.plot(tempo,V)
+plt.ylabel('Velocidade(m/s)')
+plt.xlabel('tempo(s)')
+plt.title('Velocidade total')
+plt.grid(True)
+plt.show()
 
 plt.plot(equacoes[:,0],equacoes[:,1])
 plt.ylabel('Variação da altura(m)')

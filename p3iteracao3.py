@@ -17,7 +17,7 @@ g=10 #m/s2
 m=47.1 #kg
 A=0.51 #m2
 Vo=20 #m/s
-B=(math.pi/4) #rad
+Bo=(math.pi/4) #rad
 Ch=1.3
 p=1.3 #kg/m**3
 w=3#rad/s
@@ -30,15 +30,14 @@ def cossdoa(vx,vy):
     c=vy/((vx**2+vy**2)**(1/2))
     return c
               
-def senodeao(vx,vy,tempo):
-    s=senodoa(vx,vy)*(np.cos(w*tempo))-(np.sin(w*tempo))*cossdoa(vx,vy)
-    return s
+def bf(vx,vy):
+    a=math.asin(vx/((vx**2+vy**2)**(1/2)))
+    b=(math.pi/2)-a 
+    return b-Bo
 
-def cossdeao(vx,vy,tempo):
-    c=cossdoa(vx,vy)*np.cos(w*tempo)+senodoa(vx,vy)*np.sin(w*tempo)
-    return c
-    
-    
+def anf(vx,vy,tempo):
+    a=(math.sin(bf(vx,vy)))*math.cos(w*tempo)+(math.sin(w*tempo))*math.cos(bf(vx,vy))
+    return a
 
 def eq(Y,tempo):
     x=Y[0]
@@ -47,21 +46,21 @@ def eq(Y,tempo):
     vy=Y[3]
     dxdt=vx
     dydt=vy
-    dvxdt=-(1/2)*p*Ch*(A*senodeao(vx,vy,tempo))*(vx**2)*senodeao(vx,vy,tempo)/m
-    dvydt=-g-(1/2)*p*Ch*(A*senodeao(vx,vy,tempo))*(vy**2)*cossdeao(vx,vy,tempo)/m
+    dvxdt=-(1/2)*p*Ch*(A*anf(vx,vy,tempo))*(vx**2)*senodoa(vx,vy)/m
+    dvydt=-g-(1/2)*p*Ch*(A*anf(vx,vy,tempo))*(vy**2)*cossdoa(vx,vy)/m
     return [dxdt,dydt,dvxdt,dvydt]
 
 
 
-C0=[0,0,Vo*math.cos(B),Vo*math.sin(B)]
+C0=[0,0,Vo*math.cos(Bo),Vo*math.sin(Bo)]
 equacoes=odeint(eq,C0,tempo)
 VX=[]
 VY=[]
 
-for i in equacoes[:,0]:
+for i in equacoes[:,2]:
     VX.append(i)
     
-for i in equacoes[:,1]:
+for i in equacoes[:,3]:
     VY.append(i)
 
 V=[]
@@ -70,26 +69,29 @@ for i in range(len(VX)):
     V.append(a)
     
     
-plt.plot(tempo,equacoes[:,0])
-plt.ylabel('Velocidade de x')
-plt.xlabel('tempo')
+plt.plot(tempo,equacoes[:,2],'g')
+plt.ylabel('Velocidade em x(m/s)')
+plt.xlabel('tempo(s)')
+plt.title('Velocidade em x')
 plt.grid(True)
 plt.show()
 
-plt.plot(tempo,equacoes[:,1])
-plt.ylabel('Velocidade de y')
-plt.xlabel('tempo')
+plt.plot(tempo,equacoes[:,3],'g')
+plt.ylabel('Velocidade em y(m/s)')
+plt.xlabel('tempo(s)')
+plt.title('Velocidade em y')
 plt.grid(True)
 plt.show()
 
 
-plt.plot(tempo,V)
-plt.ylabel('Velocidade')
-plt.xlabel('tempo')
+plt.plot(tempo,V,'g')
+plt.ylabel('Velocidade(m/s)')
+plt.xlabel('tempo(s)')
+plt.title('Velocidade total')
 plt.grid(True)
 plt.show()
 
-plt.plot(equacoes[:,0],equacoes[:,1])
+plt.plot(equacoes[:,0],equacoes[:,1],'g')
 plt.ylabel('Variação da altura(m)')
 plt.xlabel('Variação da distância(m)')
 plt.axis([0, 40, 0, 12])
